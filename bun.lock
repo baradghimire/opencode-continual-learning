@@ -5,8 +5,8 @@
     "": {
       "name": "opencode-handoff",
       "dependencies": {
-        "@opencode-ai/plugin": "^1.0.143",
-        "@opencode-ai/sdk": "^1.0.143",
+        "@opencode-ai/plugin": "^1.0.188",
+        "@opencode-ai/sdk": "^1.0.188",
         "zod": "^4.1.13",
       },
       "devDependencies": {
@@ -17,9 +17,9 @@
     },
   },
   "packages": {
-    "@opencode-ai/plugin": ["@opencode-ai/plugin@1.0.164", "", { "dependencies": { "@opencode-ai/sdk": "1.0.164", "zod": "4.1.8" } }, "sha512-b3zLvs/81oAuRPPPw0eLCtYVf63U+Dq+zp6bYtMbb0plt7LgwVeFMA3NEK1JpBuc4cMra1UgvXsDr2R9mLDkIQ=="],
+    "@opencode-ai/plugin": ["@opencode-ai/plugin@1.2.7", "", { "dependencies": { "@opencode-ai/sdk": "1.2.7", "zod": "4.1.8" } }, "sha512-32C1n7LhIgbtHRDOK8OgMLgfJWC7+xu3KuDCFjSPCQcNAVfd4Z50Q9GGbEpwhX++XopYP3b/5pYE0ylcOJw1+w=="],
 
-    "@opencode-ai/sdk": ["@opencode-ai/sdk@1.0.164", "", {}, "sha512-TG+bpgL3O4tU/vCOT0THaSL5wJoXc15ErS79NLrEzFj1Igq1a9Mhef3oYZae0zZOI/ZTl/VNswguUeqkBm41pg=="],
+    "@opencode-ai/sdk": ["@opencode-ai/sdk@1.2.7", "", {}, "sha512-Y5pUwYbWBucVb/9mQjtyC/v7qkTnsliR9jiA8C6zrqwKPYOloBkQF/fwbgedBvK7lkRJrIpiVAueINSq5EzJTA=="],
 
     "@types/bun": ["@types/bun@1.3.4", "", { "dependencies": { "bun-types": "1.3.4" } }, "sha512-EEPTKXHP+zKGPkhRLv+HI0UEX8/o+65hqARxLy8Ov5rIxMBPNTjeZww00CIihrIQGEQBYg+0roO5qOnS/7boGA=="],
 
