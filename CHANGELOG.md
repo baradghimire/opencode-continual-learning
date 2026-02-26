@@ -18,6 +18,10 @@ and this project attempts to adhere to [Semantic Versioning](https://semver.org/
 
 ## [Unreleased]
 
+### Changed 
+
+- Bumped `@opencode-ai/plugin` and `@opencode-ai/sdk` to 1.2.15
+
 ## [0.4.1]
 
 ### Fixed
