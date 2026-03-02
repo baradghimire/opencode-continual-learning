@@ -1,19 +1,22 @@
 {
-  "name": "opencode-handoff",
-  "version": "0.5.0",
+  "name": "opencode-continual-learning",
+  "version": "0.1.0",
   "type": "module",
-  "description": "Create focused handoff prompts for continuing work in new OpenCode sessions",
-  "author": "Josh Thomas <josh@joshthomas.dev>",
+  "description": "Automatically and incrementally keeps AGENTS.md up to date by mining session conversations for high-signal learnings",
+  "author": "Barad Ghimire",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/joshuadavidthomas/opencode-handoff"
+    "url": "https://github.com/baradghimire/opencode-continual-learning"
   },
   "keywords": [
     "opencode",
     "plugin",
     "agent",
-    "ai"
+    "ai",
+    "agents-md",
+    "continual-learning",
+    "memory"
   ],
   "main": "src/plugin.ts",
   "files": ["src", "README.md"],
@@ -22,8 +25,7 @@
   },
   "dependencies": {
     "@opencode-ai/plugin": "^1.2.15",
-    "@opencode-ai/sdk": "^1.2.15",
-    "zod": "^4.1.13"
+    "@opencode-ai/sdk": "^1.2.15"
   },
   "devDependencies": {
     "@types/bun": "latest",
