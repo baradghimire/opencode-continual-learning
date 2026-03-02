@@ -1,15 +1,15 @@
-# opencode-handoff
+# opencode-continual-learning
 
-Create focused handoff prompts for continuing work in new sessions.
-
-Inspired by Amp's handoff command - see their [post](https://ampcode.com/news/handoff) and [manual](https://ampcode.com/manual#handoff) about it.
+Automatically and incrementally keeps `AGENTS.md` up to date by mining the current session's conversation for high-signal learnings.
 
 ## Features
 
-- `/handoff <goal>` command that analyzes the conversation and generates a continuation prompt
-- Guides the AI to include relevant `@file` references so the next session starts with context loaded
-- Opens a new session with the prompt as an editable draft
-- `read_session` tool for retrieving full conversation transcripts from previous sessions when the handoff summary isn't sufficient
+- **Automatic learning**: after a configurable number of completed turns and elapsed time, the plugin silently injects a prompt that tells the AI to run the `continual-learning` skill and update `AGENTS.md`
+- **`/learn` command**: manually trigger a learning pass at any time
+- **`AGENTS.md`-aware updates**: the AI reads existing entries and updates them in place rather than appending blindly, keeping the file clean and deduplicated
+- **Noise-resistant**: only high-signal, reusable information is written—recurring preferences and durable workspace facts only; one-off instructions and transient details are excluded
+- **Configurable cadence**: tune the trigger thresholds via environment variables; trial mode for faster initial feedback
+- **Bundled skill**: a `continual-learning` SKILL.md is written to `.opencode/skills/` in your project on first load, providing the AI with detailed extraction and merge instructions
 
 ## Requirements
 
@@ -21,7 +21,7 @@ Add to your OpenCode config (`~/.config/opencode/opencode.json`):
 
 ```json
 {
-  "plugin": ["opencode-handoff"]
+  "plugin": ["opencode-continual-learning"]
 }
 ```
 
@@ -31,68 +31,112 @@ Optionally, pin to a specific version for stability:
 
 ```json
 {
-  "plugin": ["opencode-handoff@0.5.0"]
+  "plugin": ["opencode-continual-learning@0.1.0"]
 }
 ```
 
-OpenCode fetches unpinned plugins from npm on each startup; pinned versions are cached and require a manual version bump to update.
-
 ## Usage
 
-1. Have a conversation in OpenCode with some context
-2. When ready to continue in a fresh session, type `/handoff <your goal>`
-3. A new session opens with the handoff prompt as an editable draft
-4. Review and edit the draft if needed, then send
+### Automatic
 
-**Example:**
+The plugin runs silently in the background. After the cadence threshold is met (default: 10 completed turns **and** 120 minutes since the last run), it injects a prompt that asks the AI to invoke the `continual-learning` skill. The AI reads `AGENTS.md`, mines the session conversation, and writes back only:
 
-```
-/handoff implement the user authentication feature we discussed
-```
+- `## Learned User Preferences` — recurring corrections and stated preferences
+- `## Learned Workspace Facts` — durable facts about the project (patterns, conventions, tech choices)
 
-The AI analyzes the conversation, extracts key decisions and relevant files, generates a focused prompt, and creates a new session with that prompt ready to edit.
+### Manual
 
-### Reading Previous Session Transcripts
-
-When you use `/handoff`, the generated prompt includes a session reference line:
+Run `/learn` at any point to trigger a learning pass immediately:
 
 ```
-Continuing work from session sess_01jxyz123. When you lack specific information you can use read_session to get it.
+/learn
 ```
 
-This gives the AI in the new session access to the `read_session` tool, which can fetch the full conversation transcript from the source session. If the handoff summary doesn't include something you need, just ask - the AI can look it up.
+The cadence timer is reset after a manual run so the auto-trigger backs off.
 
-**Example:**
+## What gets written to AGENTS.md
+
+The AI only stores items that meet all of these criteria:
+
+| Criterion | Example |
+|---|---|
+| Actionable in future sessions | "Always use `pnpm` instead of `npm`" |
+| Stable across sessions | "The API layer lives in `packages/api/src/`" |
+| Repeated or stated as a broad rule | User has corrected the same thing multiple times |
+| Non-sensitive | No credentials, personal data |
+
+Items that are **never** stored: secrets, one-off task instructions, transient details (branch names, commit hashes, temporary error messages).
+
+## Configuration
+
+### Cadence (environment variables)
+
+| Variable | Default | Description |
+|---|---|---|
+| `CONTINUAL_LEARNING_MIN_TURNS` | `10` | Minimum completed turns before triggering |
+| `CONTINUAL_LEARNING_MIN_MINUTES` | `120` | Minimum minutes since last run |
+| `CONTINUAL_LEARNING_TRIAL_MODE` | `false` | Enable reduced thresholds for initial testing |
+| `CONTINUAL_LEARNING_TRIAL_MIN_TURNS` | `3` | Min turns in trial mode |
+| `CONTINUAL_LEARNING_TRIAL_MIN_MINUTES` | `15` | Min minutes in trial mode |
+| `CONTINUAL_LEARNING_TRIAL_DURATION_MINUTES` | `1440` | How long trial mode lasts (minutes) |
+
+Set `CONTINUAL_LEARNING_TRIAL_MODE=1` for quicker feedback when first setting up the plugin.
+
+### State file
+
+Per-project cadence state is stored at:
 
 ```
-You: What were the specific error messages we saw earlier?
+<project>/.opencode/state/continual-learning.json
 ```
 
-The AI will use `read_session` to retrieve details from the previous session that weren't included in the handoff summary.
+Delete this file to reset the turn counter and timer.
+
+### Skill file
+
+The plugin writes a `SKILL.md` to:
+
+```
+<project>/.opencode/skills/continual-learning/SKILL.md
+```
+
+This file is automatically updated when the plugin version changes. You can customize it per-project after installation—the plugin will not overwrite a file that already matches the current version marker.
 
 ## Contributing
 
-Contributions are welcome! Here's how to set up for development:
-
 ```bash
-git clone https://github.com/joshuadavidthomas/opencode-handoff
-cd opencode-handoff
-bun install
+git clone https://github.com/baradghimire/opencode-continual-learning
+cd opencode-continual-learning
+npm install
 ```
 
-Then symlink the plugin to your OpenCode config:
+Symlink the plugin to your OpenCode config for local development:
 
 ```bash
-mkdir -p ~/.config/opencode/plugin
-ln -sf "$(pwd)/src/plugin.ts" ~/.config/opencode/plugin/handoff.ts
+mkdir -p ~/.config/opencode/plugins
+ln -sf "$(pwd)/src/plugin.ts" ~/.config/opencode/plugins/continual-learning.ts
 ```
+
+Run the type checker:
+
+```bash
+npm run typecheck
+```
+
+## Attribution
+
+This plugin is inspired by and draws directly from:
+
+- **[cursor/plugins — continual-learning](https://github.com/cursor/plugins)**: the original plugin concept, cadence logic, SKILL.md workflow, and `AGENTS.md` output contract. The trigger cadence, trial mode, and inclusion/exclusion rules are adapted from Cursor's implementation.
+
+- **[joshuadavidthomas/opencode-handoff](https://github.com/joshuadavidthomas/opencode-handoff)**: the OpenCode plugin architecture, patterns for using `@opencode-ai/plugin` and `@opencode-ai/sdk`, the `config` hook pattern for registering commands, and the `command.execute.before` hook pattern. This repository was forked as the starting point.
 
 ## License
 
-opencode-handoff is licensed under the MIT license. See the [`LICENSE`](LICENSE) file for more information.
+opencode-continual-learning is licensed under the MIT license. See the [`LICENSE`](LICENSE) file for more information.
 
 ---
 
-opencode-handoff is not built by, or affiliated with, the OpenCode team.
+opencode-continual-learning is not built by, or affiliated with, the OpenCode team.
 
 OpenCode is ©2025 Anomaly.

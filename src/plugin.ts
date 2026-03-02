@@ -1,103 +1,285 @@
+/**
+ * opencode-continual-learning
+ *
+ * Automatically and incrementally keeps AGENTS.md up to date by mining the
+ * current session's conversation for high-signal learnings.
+ *
+ * Inspired by:
+ *   - cursor/plugins continual-learning (https://github.com/cursor/plugins)
+ *   - opencode-handoff by Josh Thomas (https://github.com/joshuadavidthomas/opencode-handoff)
+ */
+
 import type { Plugin } from "@opencode-ai/plugin"
-import { HandoffSession, ReadSession } from "./tools"
-import { parseFileReferences, buildSyntheticFileParts } from "./files"
+import * as fs from "node:fs"
+import * as path from "node:path"
+import { loadState, saveState } from "./state"
 
-const HANDOFF_COMMAND = `GOAL: You are creating a handoff message to continue work in a new session.
+// ---------------------------------------------------------------------------
+// Cadence constants & helpers
+// ---------------------------------------------------------------------------
 
-<context>
-When an AI assistant starts a fresh session, it spends significant time exploring the codebase—grepping, reading files, searching—before it can begin actual work. This "file archaeology" is wasteful when the previous session already discovered what matters.
+const DEFAULT_MIN_TURNS = 10
+const DEFAULT_MIN_MINUTES = 120
+const TRIAL_MIN_TURNS = 3
+const TRIAL_MIN_MINUTES = 15
+const TRIAL_DURATION_MINUTES = 24 * 60
 
-A good handoff frontloads everything the next session needs so it can start implementing immediately.
-</context>
+function parsePositiveInt(value: string | undefined, fallback: number): number {
+  if (!value) return fallback
+  const parsed = parseInt(value, 10)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
 
-<instructions>
-Analyze this conversation and extract what matters for continuing the work.
+function parseBoolean(value: string | undefined): boolean {
+  if (!value) return false
+  const v = value.trim().toLowerCase()
+  return v === "1" || v === "true" || v === "yes" || v === "on"
+}
 
-1. Identify all relevant files that should be loaded into the next session's context
+interface CadenceConfig {
+  minTurns: number
+  minMinutes: number
+  trialMode: boolean
+  trialMinTurns: number
+  trialMinMinutes: number
+  trialDurationMinutes: number
+}
 
-   Include files that will be edited, dependencies being touched, relevant tests, configs, and key reference docs. Be generous—the cost of an extra file is low; missing a critical one means another archaeology dig. Target 8-15 files, up to 20 for complex work.
+function getCadenceConfig(): CadenceConfig {
+  return {
+    minTurns: parsePositiveInt(process.env["CONTINUAL_LEARNING_MIN_TURNS"], DEFAULT_MIN_TURNS),
+    minMinutes: parsePositiveInt(process.env["CONTINUAL_LEARNING_MIN_MINUTES"], DEFAULT_MIN_MINUTES),
+    trialMode: parseBoolean(process.env["CONTINUAL_LEARNING_TRIAL_MODE"]),
+    trialMinTurns: parsePositiveInt(process.env["CONTINUAL_LEARNING_TRIAL_MIN_TURNS"], TRIAL_MIN_TURNS),
+    trialMinMinutes: parsePositiveInt(process.env["CONTINUAL_LEARNING_TRIAL_MIN_MINUTES"], TRIAL_MIN_MINUTES),
+    trialDurationMinutes: parsePositiveInt(process.env["CONTINUAL_LEARNING_TRIAL_DURATION_MINUTES"], TRIAL_DURATION_MINUTES),
+  }
+}
 
-2. Draft the context and goal description
+// ---------------------------------------------------------------------------
+// Skill definition (bundled with plugin, written to project on init)
+// ---------------------------------------------------------------------------
 
-   Describe what we're working on and provide whatever context helps continue the work. Structure it based on what fits the conversation—could be tasks, findings, a simple paragraph, or detailed steps.
+const PLUGIN_VERSION = "0.1.0"
+const SKILL_VERSION_MARKER = `<!-- continual-learning-plugin-v${PLUGIN_VERSION} -->`
 
-   Preserve: decisions, constraints, user preferences, technical patterns.
-
-   Exclude: conversation back-and-forth, dead ends, meta-commentary.
-
-The user controls what context matters. If they mentioned something to preserve, include it—trust their judgment about their workflow.
-</instructions>
-
-<user_input>
-This is what the next session should focus on. Use it to shape your handoff's direction—don't investigate or search, just incorporate the intent into your context and goals.
-
-If empty, capture a natural continuation of the current conversation's direction.
-
-USER: $ARGUMENTS
-</user_input>
-
+const SKILL_CONTENT = `---
+name: continual-learning
+description: Incrementally extract recurring user corrections and durable workspace facts from this session's messages, then update AGENTS.md with plain bullet points only. Use when the user asks to mine previous chats, maintain AGENTS.md memory, or build a self-learning preference loop.
 ---
+${SKILL_VERSION_MARKER}
 
-After generating the handoff message, IMMEDIATELY call handoff_session with your prompt and files:
-\`handoff_session(prompt="...", files=["src/foo.ts", "src/bar.ts", ...])\``
+# Continual Learning
 
-export const HandoffPlugin: Plugin = async (ctx) => {
-  const processedSessions = new Set<string>()
+Keep \`AGENTS.md\` current by mining this session's conversation history.
+
+## Inputs
+
+- Current session messages (already in context)
+- Existing memory file: \`AGENTS.md\`
+
+## Workflow
+
+1. Read existing \`AGENTS.md\`.
+2. Review messages from the current session conversation.
+3. Extract only high-signal, reusable information:
+   - Recurring user corrections/preferences
+   - Durable workspace facts (patterns, conventions, tech choices)
+4. Merge with existing bullets in \`AGENTS.md\`:
+   - Update matching bullets in place
+   - Add only net-new bullets
+   - Deduplicate semantically similar bullets
+5. Write back to \`AGENTS.md\` with only these two sections added/updated:
+   - \`## Learned User Preferences\`
+   - \`## Learned Workspace Facts\`
+
+## AGENTS.md Output Contract
+
+- Manage only these sections:
+  - \`## Learned User Preferences\`
+  - \`## Learned Workspace Facts\`
+- Use plain bullet points only.
+- Do not write evidence/confidence tags.
+- Do not write process instructions, rationale, or metadata blocks.
+- Maximum 12 bullets per section.
+
+## Inclusion Bar
+
+Keep an item only if **all** are true:
+
+- Actionable in future sessions
+- Stable across sessions
+- Repeated in the conversation, or explicitly stated as a broad rule
+- Non-sensitive
+
+## Exclusions
+
+Never store:
+
+- Secrets, tokens, credentials, private personal data
+- One-off task instructions
+- Transient details (branch names, commit hashes, temporary errors)
+`
+
+/**
+ * Write the SKILL.md to the project's .opencode/skills directory.
+ * Only writes if the file is missing or was created by an older plugin version.
+ */
+function ensureSkill(directory: string): void {
+  const skillDir = path.join(directory, ".opencode", "skills", "continual-learning")
+  const skillPath = path.join(skillDir, "SKILL.md")
+
+  const needsWrite = (() => {
+    if (!fs.existsSync(skillPath)) return true
+    try {
+      const existing = fs.readFileSync(skillPath, "utf-8")
+      return !existing.includes(SKILL_VERSION_MARKER)
+    } catch {
+      return true
+    }
+  })()
+
+  if (!needsWrite) return
+
+  fs.mkdirSync(skillDir, { recursive: true })
+  fs.writeFileSync(skillPath, SKILL_CONTENT, "utf-8")
+}
+
+// ---------------------------------------------------------------------------
+// Prompt templates
+// ---------------------------------------------------------------------------
+
+/**
+ * Prompt injected automatically when the cadence threshold is reached.
+ * Instructs the AI to invoke the continual-learning skill.
+ */
+const AUTO_FOLLOWUP_PROMPT =
+  "Run the `continual-learning` skill now. Review this session's conversation to extract high-signal learnings. " +
+  "First read existing `AGENTS.md` and update matching entries in place—do not only append. " +
+  'Write only to "## Learned User Preferences" and "## Learned Workspace Facts" sections with plain bullet points only—no metadata annotations. ' +
+  "Maximum 12 bullets per section. " +
+  "If no meaningful updates exist, respond exactly: No high-signal memory updates."
+
+/**
+ * Template for the /learn command (manual trigger, identical intent but
+ * without an internal marker so it reads naturally as a user message).
+ */
+const LEARN_COMMAND_TEMPLATE =
+  "Run the `continual-learning` skill now. Review this session's conversation to extract high-signal learnings. " +
+  "First read existing `AGENTS.md` and update matching entries in place—do not only append. " +
+  'Write only to "## Learned User Preferences" and "## Learned Workspace Facts" sections with plain bullet points only—no metadata annotations. ' +
+  "Maximum 12 bullets per section. " +
+  "If no meaningful updates exist, respond exactly: No high-signal memory updates."
+
+// ---------------------------------------------------------------------------
+// Plugin
+// ---------------------------------------------------------------------------
+
+export const ContinualLearningPlugin: Plugin = async (ctx) => {
+  const { client, directory } = ctx
+
+  // Track sessions where we just injected a learning prompt so we skip
+  // counting their next session.idle (the AI's response to our trigger).
+  const pendingLearning = new Set<string>()
+
+  // Ensure the skill definition exists in this project (non-fatal on failure)
+  try {
+    ensureSkill(directory)
+  } catch {
+    // Skill creation failure should not block the plugin
+  }
 
   return {
+    // Register the /learn command for manual triggering
     config: async (config) => {
-      config.command = config.command || {}
-      config.command["handoff"] = {
-        description: "Create a focused handoff prompt for a new session",
-        template: HANDOFF_COMMAND,
+      config.command = config.command ?? {}
+      config.command["learn"] = {
+        description: "Mine this session for learnings and update AGENTS.md",
+        template: LEARN_COMMAND_TEMPLATE,
       }
     },
 
-    tool: {
-      handoff_session: HandoffSession(ctx.client),
-      read_session: ReadSession(ctx.client),
+    // When the user runs /learn manually, mark the session as pending so
+    // the AI's response turn doesn't inflate the auto-trigger counter.
+    // Also reset the cadence timer so auto-triggering backs off.
+    "command.execute.before": async (input) => {
+      if (input.command !== "learn") return
+
+      pendingLearning.add(input.sessionID)
+
+      try {
+        const state = loadState(directory)
+        state.lastRunAtMs = Date.now()
+        state.turnsSinceLastRun = 0
+        saveState(directory, state)
+      } catch {
+        // Non-fatal
+      }
     },
 
-    "chat.message": async (_input, output) => {
-      const sessionID = output.message.sessionID
-
-      if (processedSessions.has(sessionID)) return
-
-      // Get non-synthetic text from the message
-      const text = output.parts
-        .filter((p): p is typeof p & { type: "text"; text: string } =>
-          p.type === "text" && !p.synthetic && typeof p.text === "string"
-        )
-        .map(p => p.text)
-        .join("\n")
-
-      if (!text.includes("Continuing work from session")) return
-
-      processedSessions.add(sessionID)
-
-      const fileRefs = parseFileReferences(text)
-      if (fileRefs.size === 0) return
-
-      const fileParts = await buildSyntheticFileParts(ctx.directory, fileRefs)
-      if (fileParts.length === 0) return
-
-      // Inject file parts via noReply
-      // Must pass model and agent to prevent mode/model switching
-      await ctx.client.session.prompt({
-        path: { id: sessionID },
-        body: {
-          noReply: true,
-          model: output.message.model,
-          agent: output.message.agent,
-          parts: fileParts,
-        },
-      })
-    },
-
+    // Core logic: count turns and trigger learning when the cadence is met
     event: async ({ event }) => {
-      if (event.type === "session.deleted") {
-        processedSessions.delete(event.properties.info.id)
+      if (event.type !== "session.idle") return
+
+      const sessionId = event.properties.sessionID
+      if (!sessionId) return
+
+      // Skip the idle that follows our own injected learning prompt
+      if (pendingLearning.has(sessionId)) {
+        pendingLearning.delete(sessionId)
+        return
       }
-    }
+
+      const state = loadState(directory)
+      const config = getCadenceConfig()
+      const now = Date.now()
+
+      // Start the trial timer on the first counted turn (if trial mode is on)
+      if (config.trialMode && state.trialStartedAtMs === null) {
+        state.trialStartedAtMs = now
+      }
+
+      // Determine effective thresholds
+      const inTrial =
+        config.trialMode &&
+        state.trialStartedAtMs !== null &&
+        now - state.trialStartedAtMs < config.trialDurationMinutes * 60_000
+
+      const effectiveMinTurns = inTrial ? config.trialMinTurns : config.minTurns
+      const effectiveMinMinutes = inTrial ? config.trialMinMinutes : config.minMinutes
+
+      const turnsSinceLastRun = state.turnsSinceLastRun + 1
+      const minutesSinceLastRun =
+        state.lastRunAtMs > 0
+          ? Math.floor((now - state.lastRunAtMs) / 60_000)
+          : Infinity
+
+      // Check cadence gates
+      if (turnsSinceLastRun < effectiveMinTurns || minutesSinceLastRun < effectiveMinMinutes) {
+        state.turnsSinceLastRun = turnsSinceLastRun
+        saveState(directory, state)
+        return
+      }
+
+      // All gates passed — trigger learning
+      state.lastRunAtMs = now
+      state.turnsSinceLastRun = 0
+      saveState(directory, state)
+
+      pendingLearning.add(sessionId)
+
+      try {
+        await client.session.prompt({
+          path: { id: sessionId },
+          body: {
+            parts: [{ type: "text", text: AUTO_FOLLOWUP_PROMPT }],
+          },
+        })
+      } catch {
+        // If injection fails, remove from pendingLearning so the counter
+        // resumes normally on the next turn
+        pendingLearning.delete(sessionId)
+      }
+    },
   }
 }
