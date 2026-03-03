@@ -6,7 +6,7 @@
  *
  * Inspired by:
  *   - cursor/plugins continual-learning (https://github.com/cursor/plugins)
- *   - opencode-handoff by Josh Thomas (https://github.com/joshuadavidthomas/opencode-handoff)
+ *   - Josh Thomas' original OpenCode handoff plugin
  */
 
 import type { Plugin } from "@opencode-ai/plugin"
@@ -199,26 +199,15 @@ export const ContinualLearningPlugin: Plugin = async (ctx) => {
       }
     },
 
-    // When the user runs /learn manually, mark the session as pending so
-    // the AI's response turn doesn't inflate the auto-trigger counter.
-    // Also reset the cadence timer so auto-triggering backs off.
-    "command.execute.before": async (input) => {
-      if (input.command !== "learn") return
-
-      pendingLearning.add(input.sessionID)
-
-      try {
-        const state = loadState(directory)
-        state.lastRunAtMs = Date.now()
-        state.turnsSinceLastRun = 0
-        saveState(directory, state)
-      } catch {
-        // Non-fatal
-      }
-    },
-
     // Core logic: count turns and trigger learning when the cadence is met
     event: async ({ event }) => {
+      if (event.type === "command.executed") {
+        if (event.properties.name === "learn") {
+          pendingLearning.add(event.properties.sessionID)
+        }
+        return
+      }
+
       if (event.type !== "session.idle") return
 
       const sessionId = event.properties.sessionID
@@ -227,6 +216,16 @@ export const ContinualLearningPlugin: Plugin = async (ctx) => {
       // Skip the idle that follows our own injected learning prompt
       if (pendingLearning.has(sessionId)) {
         pendingLearning.delete(sessionId)
+
+        try {
+          const state = loadState(directory)
+          state.lastRunAtMs = Date.now()
+          state.turnsSinceLastRun = 0
+          saveState(directory, state)
+        } catch {
+          // Non-fatal
+        }
+
         return
       }
 
@@ -254,16 +253,16 @@ export const ContinualLearningPlugin: Plugin = async (ctx) => {
           ? Math.floor((now - state.lastRunAtMs) / 60_000)
           : Infinity
 
+      state.turnsSinceLastRun = turnsSinceLastRun
+
       // Check cadence gates
       if (turnsSinceLastRun < effectiveMinTurns || minutesSinceLastRun < effectiveMinMinutes) {
-        state.turnsSinceLastRun = turnsSinceLastRun
         saveState(directory, state)
         return
       }
 
-      // All gates passed — trigger learning
-      state.lastRunAtMs = now
-      state.turnsSinceLastRun = 0
+      // All gates passed — trigger learning (only mark cadence run complete
+      // after the session.idle event that follows this injected prompt).
       saveState(directory, state)
 
       pendingLearning.add(sessionId)

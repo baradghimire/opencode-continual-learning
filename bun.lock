@@ -3,11 +3,10 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "opencode-handoff",
+      "name": "opencode-continual-learning",
       "dependencies": {
         "@opencode-ai/plugin": "^1.2.15",
         "@opencode-ai/sdk": "^1.2.15",
-        "zod": "^4.1.13",
       },
       "devDependencies": {
         "@types/bun": "latest",

@@ -129,7 +129,7 @@ This plugin is inspired by and draws directly from:
 
 - **[cursor/plugins — continual-learning](https://github.com/cursor/plugins)**: the original plugin concept, cadence logic, SKILL.md workflow, and `AGENTS.md` output contract. The trigger cadence, trial mode, and inclusion/exclusion rules are adapted from Cursor's implementation.
 
-- **[joshuadavidthomas/opencode-handoff](https://github.com/joshuadavidthomas/opencode-handoff)**: the OpenCode plugin architecture, patterns for using `@opencode-ai/plugin` and `@opencode-ai/sdk`, the `config` hook pattern for registering commands, and the `command.execute.before` hook pattern. This repository was forked as the starting point.
+- **Josh Thomas' original OpenCode handoff plugin**: this repository was forked from Josh Thomas' work and adapted for continual learning. It informed the OpenCode plugin architecture usage, patterns for `@opencode-ai/plugin` and `@opencode-ai/sdk`, and the command/event hook structure used here.
 
 ## License
 
