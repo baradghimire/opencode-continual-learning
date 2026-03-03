@@ -24,7 +24,18 @@ jobs:
           
           # Get tracked commit from tracking file
           if [ -f .github/UPSTREAM_TRACKING.md ]; then
-            TRACKED_CURSOR=$(grep -A2 "cursor/plugins" .github/UPSTREAM_TRACKING.md | grep "Commit Tracked" | sed 's/.*@ //' | cut -c1-7)
+            TRACKED_CURSOR=$(awk '
+              /^## cursor\/plugins$/ { in_section=1; next }
+              /^## / && in_section { in_section=0 }
+              in_section && /\*\*Commit Tracked:\*\*/ {
+                line=$0
+                sub(/^.*\*\*Commit Tracked:\*\* /, "", line)
+                if (match(line, /[0-9a-fA-F]{7,40}/)) {
+                  print substr(line, RSTART, 7)
+                }
+                exit
+              }
+            ' .github/UPSTREAM_TRACKING.md)
             if [ -z "$TRACKED_CURSOR" ]; then
               TRACKED_CURSOR="unknown"
             fi
@@ -50,7 +61,18 @@ jobs:
           
           # Get tracked version from tracking file
           if [ -f .github/UPSTREAM_TRACKING.md ]; then
-            TRACKED_HANDOFF=$(grep -A2 "opencode-handoff" .github/UPSTREAM_TRACKING.md | grep "Version Tracked" | sed 's/.*: //')
+            TRACKED_HANDOFF=$(awk '
+              /^## joshuadavidthomas\/opencode-handoff$/ { in_section=1; next }
+              /^## / && in_section { in_section=0 }
+              in_section && /\*\*Version Tracked:\*\*/ {
+                line=$0
+                sub(/^.*\*\*Version Tracked:\*\* /, "", line)
+                sub(/[[:space:]]*\(.*\)$/, "", line)
+                gsub(/^[[:space:]]+|[[:space:]]+$/, "", line)
+                print line
+                exit
+              }
+            ' .github/UPSTREAM_TRACKING.md)
             if [ -z "$TRACKED_HANDOFF" ]; then
               TRACKED_HANDOFF="unknown"
             fi
