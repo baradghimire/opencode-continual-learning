@@ -5,6 +5,7 @@
 - TypeScript is the preferred language for OpenCode plugins
 - Values clean project metadata and lockfile consistency
 - Maintain automated upstream dependency tracking with weekly sync checks
+- Use `/oc` command via GitHub Actions to validate and auto-fix issues
 
 ## Learned Workspace Facts
 
@@ -14,3 +15,5 @@
 - Plugin persists per-project state to `.opencode/state/continual-learning.json`
 - Plugin environment variables control cadence: `CONTINUAL_LEARNING_MIN_TURNS`, `CONTINUAL_LEARNING_MIN_MINUTES`, `CONTINUAL_LEARNING_TRIAL_MODE`
 - Upstream dependencies tracked in `.github/UPSTREAM_TRACKING.md` with automated weekly sync checks via GitHub Actions
+- Plugin is actively dogfooded in its own repository
+- GitHub Issues enabled after initial setup for better issue tracking workflow
