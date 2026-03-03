@@ -57,6 +57,7 @@ jobs:
         run: |
           # Get latest release from opencode-handoff
           LATEST_HANDOFF=$(curl -s https://api.github.com/repos/joshuadavidthomas/opencode-handoff/releases/latest | jq -r '.tag_name')
+          LATEST_HANDOFF_NORMALIZED=${LATEST_HANDOFF#v}
           echo "latest_handoff=$LATEST_HANDOFF" >> $GITHUB_OUTPUT
           
           # Get tracked version from tracking file
@@ -79,10 +80,16 @@ jobs:
           else
             TRACKED_HANDOFF="unknown"
           fi
+
+          if [ "$TRACKED_HANDOFF" != "unknown" ]; then
+            TRACKED_HANDOFF_NORMALIZED=${TRACKED_HANDOFF#v}
+          else
+            TRACKED_HANDOFF_NORMALIZED="unknown"
+          fi
           
           echo "tracked_handoff=$TRACKED_HANDOFF" >> $GITHUB_OUTPUT
           
-          if [ "$LATEST_HANDOFF" != "$TRACKED_HANDOFF" ]; then
+          if [ "$LATEST_HANDOFF_NORMALIZED" != "$TRACKED_HANDOFF_NORMALIZED" ]; then
             echo "handoff_changed=true" >> $GITHUB_OUTPUT
             echo "::warning::opencode-handoff has new release (was: $TRACKED_HANDOFF, now: $LATEST_HANDOFF)"
           else
