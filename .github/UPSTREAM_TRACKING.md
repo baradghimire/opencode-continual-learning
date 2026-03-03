@@ -11,9 +11,9 @@ This document tracks the two upstream projects this plugin is built upon.
 
 ### Current Status
 - **Last Sync Date:** 2026-03-03
-- **Commit Tracked:** main @ (latest - check with `git ls-remote`)
+- **Commit Tracked:** `762f866` (main)
 - **Key Files Monitored:**
-  - `continual-learning/SKILL.md` - Skill definition and workflow instructions
+  - `continual-learning/skills/continual-learning/SKILL.md` - Skill definition and workflow instructions
   - `continual-learning/.cursor-plugin/plugin.json` - Plugin manifest format
   - `README.md` - Conceptual changes to cadence/rules
 
