@@ -18,6 +18,12 @@ and this project attempts to adhere to [Semantic Versioning](https://semver.org/
 
 ## [Unreleased]
 
+## [0.1.1]
+
+### Fixed
+
+- Refresh `bun.lock` to keep CI release installs deterministic with `bun install --frozen-lockfile`
+
 ## [0.1.0]
 
 ### Added
@@ -30,5 +36,6 @@ and this project attempts to adhere to [Semantic Versioning](https://semver.org/
 - `command.execute.before` hook resets cadence timer when `/learn` is run manually
 - Full environment variable configuration for all cadence thresholds
 
-[unreleased]: https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/baradghimire/opencode-continual-learning/releases/tag/v0.1.1
 [0.1.0]: https://github.com/baradghimire/opencode-continual-learning/releases/tag/v0.1.0
