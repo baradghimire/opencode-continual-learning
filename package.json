@@ -1,13 +1,13 @@
 {
   "name": "opencode-continual-learning",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Automatically and incrementally keeps AGENTS.md up to date by mining session conversations for high-signal learnings",
   "author": "Barad Ghimire",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/baradghimire/opencode-continual-learning"
+    "url": "git+https://github.com/baradghimire/opencode-continual-learning.git"
   },
   "keywords": [
     "opencode",

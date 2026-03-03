@@ -18,6 +18,13 @@ and this project attempts to adhere to [Semantic Versioning](https://semver.org/
 
 ## [Unreleased]
 
+## [0.1.2]
+
+### Fixed
+
+- Use npm trusted publishing flow in release workflow with `npm publish --provenance`
+- Normalize npm repository metadata to canonical `git+https` URL format
+
 ## [0.1.1]
 
 ### Fixed
@@ -36,6 +43,7 @@ and this project attempts to adhere to [Semantic Versioning](https://semver.org/
 - `command.execute.before` hook resets cadence timer when `/learn` is run manually
 - Full environment variable configuration for all cadence thresholds
 
-[unreleased]: https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.1...HEAD
+[unreleased]: https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/baradghimire/opencode-continual-learning/releases/tag/v0.1.2
 [0.1.1]: https://github.com/baradghimire/opencode-continual-learning/releases/tag/v0.1.1
 [0.1.0]: https://github.com/baradghimire/opencode-continual-learning/releases/tag/v0.1.0
