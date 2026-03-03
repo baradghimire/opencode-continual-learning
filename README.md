@@ -31,7 +31,7 @@ Optionally, pin to a specific version for stability:
 
 ```json
 {
-  "plugin": ["opencode-continual-learning@0.1.3"]
+  "plugin": ["opencode-continual-learning@0.1.4"]
 }
 ```
 
