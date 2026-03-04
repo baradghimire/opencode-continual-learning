@@ -17,3 +17,5 @@
 - Upstream dependencies tracked in `.github/UPSTREAM_TRACKING.md` with automated weekly sync checks via GitHub Actions
 - Plugin is actively dogfooded in its own repository
 - GitHub Issues enabled after initial setup for better issue tracking workflow
+- `/oc` GitHub Action model selection should use `https://opencode.ai/zen/v1/models`, prefer `-free` models, and format selected models as `owned_by/id` when needed
+- `/oc` GitHub Action fallback model is `opencode/kimi-k2`

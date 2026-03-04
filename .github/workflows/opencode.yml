@@ -41,7 +41,7 @@ jobs:
             exit 0
           fi
 
-          selected_model="$(jq -r 'first(.data[]?.id | select(type == "string" and test("-free"; "i"))) // empty' "$response_file")"
+          selected_model="$(jq -r 'first(.data[]? | select(.id | type == "string" and test("-free"; "i")) | if (.id | contains("/")) then .id elif (.owned_by | type == "string" and length > 0) then "\(.owned_by)/\(.id)" else .id end) // empty' "$response_file")"
           if [ -z "$selected_model" ]; then
             selected_model="$FALLBACK_MODEL"
           fi
