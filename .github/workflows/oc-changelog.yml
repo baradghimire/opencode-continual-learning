@@ -12,8 +12,6 @@ jobs:
   oc-zen-free:
     if: |
       github.event.pull_request.draft == false &&
-      github.event.pull_request.head.repo.fork == false &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
       startsWith(github.event.pull_request.head.ref, 'release-please--')
     uses: ./.github/workflows/oc-zen-free.yml
 
