@@ -1,6 +1,6 @@
 {
   "name": "opencode-continual-learning",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "type": "module",
   "description": "Automatically and incrementally keeps AGENTS.md up to date by mining session conversations for high-signal learnings",
   "author": "Barad Ghimire",
