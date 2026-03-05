@@ -134,7 +134,6 @@ This repository uses an automated release flow with minimal manual steps.
 | `ci.yml` | PRs + pushes to `main` | Type checking and validation |
 | `release-please.yml` | Push to `main` | Opens release PR with version bump and changelog |
 | `release.yml` | `release.published` | Publishes to npm with provenance |
-| `oc-changelog.yml` | Release-please PR events | AI-assisted changelog/release notes refinement |
 
 ### Step-by-Step
 
@@ -143,9 +142,8 @@ This repository uses an automated release flow with minimal manual steps.
 3. **Push and open a PR** — `ci` workflow runs typecheck
 4. **Merge to `main`** — requires PR review (direct pushes blocked by ruleset)
 5. **`release-please` creates/updates a Release PR** — includes version bump and changelog
-6. **`oc-changelog` runs on that Release PR** — refines PR notes and changelog wording
-7. **Review and merge the Release PR** — merge creates GitHub Release + tag
-8. **`release` workflow runs on `release.published`** — builds, attests, uploads tarball, and publishes to npm with provenance
+6. **Review and merge the Release PR** — merge creates GitHub Release + tag
+7. **`release` workflow runs on `release.published`** — builds, attests, uploads tarball, and publishes to npm with provenance
 
 ### Direct pushes to `main` are blocked
 
@@ -157,14 +155,13 @@ The repository has a ruleset enforcing PR-based changes with required review. Al
 - **`release-please`**: Uses [googleapis/release-please-action](https://github.com/googleapis/release-please-action) to manage releases. Parses Conventional Commits to determine semver bumps.
 - **`release`**: Publishes to npm with `--provenance` flag. Uses Bun for dependencies, npm for publish (npm provenance not yet available in Bun).
 - **`oc-zen-free`**: Reusable workflow that selects free OpenCode models first, falling back to `opencode/kimi-k2`.
-- **`oc-changelog`**: Runs on release-please PR events (`opened`, `synchronize`, `reopened`, `ready_for_review`) for same-repo release-please branches. Uses `oc-zen-free` for model selection and drafts/refines release notes via OpenCode Agent. Has `contents: write` permission to update `CHANGELOG.md` when needed.
 - **`upstream-sync`**: Weekly check for upstream dependency updates from cursor/plugins and opencode-handoff.
 
 ### Required Secret for Full Release Automation
 
 Set a repository secret named `RELEASE_PLEASE_TOKEN` (PAT or GitHub App token with repo/workflow permissions).
 
-Using the default `GITHUB_TOKEN` can prevent downstream PR-triggered workflows from firing on release-please-created PRs (for example `oc-changelog`).
+Using the default `GITHUB_TOKEN` can prevent downstream PR-triggered workflows from firing on release-please-created PRs.
 
 ### Manual Release Trigger
 
