@@ -1,5 +1,6 @@
 ## Learned User Preferences
 
+- Use `bun` instead of `npm` for package management
 - Use trial mode for testing plugins to get faster feedback (reduced cadence thresholds)
 - Prefer symlinking plugin source files for local development and dogfooding
 - TypeScript is the preferred language for OpenCode plugins
