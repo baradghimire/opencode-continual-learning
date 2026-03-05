@@ -1,8 +1,10 @@
 name: release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
+      - '*-v*'
 
 jobs:
   publish:
@@ -38,7 +40,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} ./*.tgz
+          # Create the release if it doesn't exist (release-please skips this with skip-github-release: true)
+          gh release create ${{ github.ref_name }} --title "${{ github.ref_name }}" --notes "See CHANGELOG.md for details" || true
+          # Upload the tarball
+          gh release upload ${{ github.ref_name }} ./*.tgz --clobber
 
       # npm still needed for trusted publishing, see:
       # https://github.com/oven-sh/bun/issues/15601
@@ -52,4 +57,6 @@ jobs:
         run: npm install -g npm@latest
 
       - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --provenance
