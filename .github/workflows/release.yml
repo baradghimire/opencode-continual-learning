@@ -42,13 +42,24 @@ jobs:
         with:
           subject-path: "./*.tgz"
 
+      - name: Create tag and release
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          # Create the tag
+          gh api repos/${{ github.repository }}/git/refs -X POST -F ref=refs/tags/$TAG -F sha=${{ github.sha }}
+          # Create the release
+          gh release create $TAG --title "$TAG" --notes "See CHANGELOG.md for details"
+
       - name: Upload release assets to GitHub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Determine the tag name from trigger type
           TAG="${{ github.event.inputs.tag || github.event.release.tag_name }}"
-          # Upload the tarball to the existing draft release
+          # Upload the tarball to the release
           gh release upload "$TAG" ./*.tgz --clobber
 
       # npm still needed for trusted publishing, see:
