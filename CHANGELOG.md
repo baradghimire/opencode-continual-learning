@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project attempts to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!--
+## [0.1.5](https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.4...v0.1.5) (2026-03-05)
+
+
+### Bug Fixes
+
+* qualify /oc free model ids with owner ([25df497](https://github.com/baradghimire/opencode-continual-learning/commit/25df497beecddec4a378c597601b615f795ab8a7))
+
 ## [${version}]
 ### Added - for new features
 ### Changed - for changes in existing functionality
