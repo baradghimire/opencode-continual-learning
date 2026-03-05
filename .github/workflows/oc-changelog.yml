@@ -14,11 +14,7 @@ jobs:
       github.event.pull_request.draft == false &&
       github.event.pull_request.head.repo.fork == false &&
       github.event.pull_request.head.repo.full_name == github.repository &&
-      startsWith(github.event.pull_request.head.ref, 'release-please--') &&
-      (
-        github.event.pull_request.user.login == 'github-actions[bot]' ||
-        github.event.pull_request.user.login == 'release-please[bot]'
-      )
+      startsWith(github.event.pull_request.head.ref, 'release-please--')
     uses: ./.github/workflows/oc-zen-free.yml
 
   oc-changelog:
@@ -47,7 +43,7 @@ jobs:
 
             Do the following:
             1. Update the pull request description with a `## Release Notes` section containing concise, user-facing bullet points.
-            2. Update `CHANGELOG.md` under `## [Unreleased]` if there are missing or unclear user-facing bullets.
+            2. Update the current release section in `CHANGELOG.md` when user-facing bullets are missing or unclear.
             3. Keep changelog formatting stable and avoid duplicate bullets.
             4. Post a short PR comment summarizing what was improved.
 
