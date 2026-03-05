@@ -1,14 +1,12 @@
 name: release
 
 on:
-  push:
-    tags:
-      - 'v*'
-      - '*-v*'
+  release:
+    types: [created]
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release (e.g., v0.3.0)'
+        description: 'Tag to release (e.g., opencode-continual-learning-v0.2.0)'
         required: true
         type: string
 
@@ -23,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
+          ref: ${{ github.event.inputs.tag || github.event.release.tag_name }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -49,10 +47,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Determine the tag name from trigger type
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          # Create the release if it doesn't exist (release-please skips this with skip-github-release: true)
-          gh release create "$TAG" --title "$TAG" --notes "See CHANGELOG.md for details" || true
-          # Upload the tarball
+          TAG="${{ github.event.inputs.tag || github.event.release.tag_name }}"
+          # Upload the tarball to the existing draft release
           gh release upload "$TAG" ./*.tgz --clobber
 
       # npm still needed for trusted publishing, see:
