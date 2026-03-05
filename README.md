@@ -160,6 +160,12 @@ The repository has a ruleset enforcing PR-based changes with required review. Al
 - **`oc-changelog`**: Runs on release-please PR events (`opened`, `synchronize`, `reopened`, `ready_for_review`) for same-repo release-please branches. Uses `oc-zen-free` for model selection and drafts/refines release notes via OpenCode Agent. Has `contents: write` permission to update `CHANGELOG.md` when needed.
 - **`upstream-sync`**: Weekly check for upstream dependency updates from cursor/plugins and opencode-handoff.
 
+### Required Secret for Full Release Automation
+
+Set a repository secret named `RELEASE_PLEASE_TOKEN` (PAT or GitHub App token with repo/workflow permissions).
+
+Using the default `GITHUB_TOKEN` can prevent downstream PR-triggered workflows from firing on release-please-created PRs (for example `oc-changelog`).
+
 ### Manual Release Trigger
 
 You can manually trigger release-please from the GitHub Actions UI if needed:
