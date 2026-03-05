@@ -1,14 +1,10 @@
 name: release
 
+# Triggered when a draft release is manually published.
+# Flow: release-please creates draft release → you review → click "Publish" → this runs.
 on:
   release:
-    types: [created]
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to release (e.g., opencode-continual-learning-v0.2.0)'
-        required: true
-        type: string
+    types: [published]
 
 jobs:
   publish:
@@ -21,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.release.tag_name || github.sha }}
+          ref: ${{ github.event.release.tag_name }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -42,28 +38,13 @@ jobs:
         with:
           subject-path: "./*.tgz"
 
-      - name: Create tag and release
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG="${{ github.event.inputs.tag }}"
-          # Create the tag
-          gh api repos/${{ github.repository }}/git/refs -X POST -F ref=refs/tags/$TAG -F sha=${{ github.sha }}
-          # Create the release
-          gh release create $TAG --title "$TAG" --notes "See CHANGELOG.md for details"
-
       - name: Upload release assets to GitHub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Determine the tag name from trigger type
-          TAG="${{ github.event.inputs.tag || github.event.release.tag_name }}"
-          # Upload the tarball to the release
-          gh release upload "$TAG" ./*.tgz --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" ./*.tgz --clobber
 
-      # npm still needed for trusted publishing, see:
-      # https://github.com/oven-sh/bun/issues/15601
+      # Bun doesn't support npm's --provenance flag yet, so we use npm for publish.
+      # See: https://github.com/oven-sh/bun/issues/15601
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:

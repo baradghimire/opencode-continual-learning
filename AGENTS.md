@@ -18,5 +18,6 @@
 - Upstream dependencies tracked in `.github/UPSTREAM_TRACKING.md` with automated weekly sync checks via GitHub Actions
 - Plugin is actively dogfooded in its own repository
 - GitHub Issues enabled after initial setup for better issue tracking workflow
-- `/oc` GitHub Action model selection should use `https://opencode.ai/zen/v1/models`, prefer `-free` models, and format selected models as `owned_by/id` when needed
-- `/oc` GitHub Action fallback model is `opencode/kimi-k2`
+- `/oc` GitHub Action: `opencode.yml` dispatches to `oc-zen-free.yml` (model selection) then `opencode` job; model selection uses `https://opencode.ai/zen/v1/models`, prefers `-free` models, falls back to `opencode/kimi-k2`
+- Release pipeline: release-please creates draft releases with `force-tag-creation` (`include-component-in-tag: false`, tags are `v*`), user manually publishes draft, which triggers `release.yml` (`on: release: published`) for npm publish with `--provenance`
+- npm publish uses Node.js/npm (not Bun) because Bun lacks `--provenance` support; `actions/checkout@v6` is the standard GHA version across workflows

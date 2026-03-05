@@ -31,7 +31,7 @@ Optionally, pin to a specific version for stability:
 
 ```json
 {
-  "plugin": ["opencode-continual-learning@0.1.4"]
+  "plugin": ["opencode-continual-learning@0.4.0"]
 }
 ```
 
@@ -142,8 +142,9 @@ This repository uses an automated release flow with minimal manual steps.
 3. **Push and open a PR** — `ci` workflow runs typecheck
 4. **Merge to `main`** — requires PR review (direct pushes blocked by ruleset)
 5. **`release-please` creates/updates a Release PR** — includes version bump and changelog
-6. **Review and merge the Release PR** — merge creates GitHub Release + tag
-7. **`release` workflow runs on `release.published`** — builds, attests, uploads tarball, and publishes to npm with provenance
+6. **Review and merge the Release PR** — creates a `v*` tag and a **draft** GitHub Release
+7. **Review the draft release** in the GitHub Releases UI, then click **"Publish release"**
+8. **`release` workflow runs** — builds, attests, uploads tarball, and publishes to npm with provenance
 
 ### Direct pushes to `main` are blocked
 
