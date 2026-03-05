@@ -1,63 +1,45 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+Entries are generated and maintained in release-please style from Conventional Commits.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project attempts to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.1.4](https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.3...v0.1.4) (2026-03-03)
 
-<!--
-## [${version}]
-### Added - for new features
-### Changed - for changes in existing functionality
-### Deprecated - for soon-to-be removed features
-### Removed - for now removed features
-### Fixed - for any bug fixes
-### Security - in case of vulnerabilities
-[${version}]: https://github.com/baradghimire/opencode-continual-learning/releases/tag/v${version}
--->
+### Miscellaneous Chores
 
-## [Unreleased]
+* release: prepare v0.1.4 ([62f1dfe](https://github.com/baradghimire/opencode-continual-learning/commit/62f1dfe))
 
-## [0.1.4]
+## [0.1.3](https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.2...v0.1.3) (2026-03-03)
 
-### Changed
+### Miscellaneous Chores
 
-- Validate npm trusted publishing configuration with a CI-driven release cut
+* release: prepare v0.1.3 ([985076e](https://github.com/baradghimire/opencode-continual-learning/commit/985076e))
 
-## [0.1.3]
+## [0.1.2](https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.1...v0.1.2) (2026-03-03)
 
-### Fixed
+### Miscellaneous Chores
 
-- Stop forcing an empty `NODE_AUTH_TOKEN` in release workflow so npm trusted publishing can use GitHub OIDC
+* release: prepare v0.1.2 ([a849dd1](https://github.com/baradghimire/opencode-continual-learning/commit/a849dd1))
 
-## [0.1.2]
+## [0.1.1](https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.0...v0.1.1) (2026-03-03)
 
-### Fixed
+### Miscellaneous Chores
 
-- Use npm trusted publishing flow in release workflow with `npm publish --provenance`
-- Normalize npm repository metadata to canonical `git+https` URL format
+* refresh bun.lock for CI publish ([1511691](https://github.com/baradghimire/opencode-continual-learning/commit/1511691))
+* release: prepare v0.1.1 ([12447bd](https://github.com/baradghimire/opencode-continual-learning/commit/12447bd))
 
-## [0.1.1]
+## [0.1.0](https://github.com/baradghimire/opencode-continual-learning/releases/tag/v0.1.0) (2026-03-03)
 
-### Fixed
+### Features
 
-- Refresh `bun.lock` to keep CI release installs deterministic with `bun install --frozen-lockfile`
+* init opencode continual learning ([56546e2](https://github.com/baradghimire/opencode-continual-learning/commit/56546e2))
+* add upstream dependency tracking and automated sync checks ([a0927c3](https://github.com/baradghimire/opencode-continual-learning/commit/a0927c3))
 
-## [0.1.0]
+### Bug Fixes
 
-### Added
+* learning cadence state handling and clean project rename remnants ([f7cfbf2](https://github.com/baradghimire/opencode-continual-learning/commit/f7cfbf2))
+* upstream parser with awk sections ([c91801a](https://github.com/baradghimire/opencode-continual-learning/commit/c91801a))
 
-- Automatic learning trigger via `session.idle` event hook with configurable cadence (min turns + min minutes)
-- `/learn` command for manual learning runs
-- Trial mode with reduced thresholds for faster initial feedback, controlled via `CONTINUAL_LEARNING_TRIAL_MODE` env var
-- Per-project state persistence at `.opencode/state/continual-learning.json`
-- Bundled `continual-learning` SKILL.md written to `.opencode/skills/` on plugin load
-- `command.execute.before` hook resets cadence timer when `/learn` is run manually
-- Full environment variable configuration for all cadence thresholds
+### Miscellaneous Chores
 
-[unreleased]: https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.4...HEAD
-[0.1.4]: https://github.com/baradghimire/opencode-continual-learning/releases/tag/v0.1.4
-[0.1.3]: https://github.com/baradghimire/opencode-continual-learning/releases/tag/v0.1.3
-[0.1.2]: https://github.com/baradghimire/opencode-continual-learning/releases/tag/v0.1.2
-[0.1.1]: https://github.com/baradghimire/opencode-continual-learning/releases/tag/v0.1.1
-[0.1.0]: https://github.com/baradghimire/opencode-continual-learning/releases/tag/v0.1.0
+* add opencode workflow and update state ([5c74993](https://github.com/baradghimire/opencode-continual-learning/commit/5c74993))
+* gitignore .opencode/state/ directory ([e38ffb5](https://github.com/baradghimire/opencode-continual-learning/commit/e38ffb5))
