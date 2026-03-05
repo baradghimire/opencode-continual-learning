@@ -2,6 +2,24 @@
 
 Entries are generated and maintained in release-please style from Conventional Commits.
 
+## [0.2.0](https://github.com/baradghimire/opencode-continual-learning/compare/opencode-continual-learning-v0.1.4...opencode-continual-learning-v0.2.0) (2026-03-05)
+
+
+### Features
+
+* add upstream dependency tracking and automated sync checks ([a0927c3](https://github.com/baradghimire/opencode-continual-learning/commit/a0927c338e31550fab240834708a916aa21be81f))
+* init opencode continual learning ([8e142dd](https://github.com/baradghimire/opencode-continual-learning/commit/8e142dd7c1f8caa0bb46f9dbcdfb8eb6dca806ab))
+* init opencode continual learning ([56546e2](https://github.com/baradghimire/opencode-continual-learning/commit/56546e2625f4ff391f7c2a6dc1f29997ff456b59))
+
+
+### Bug Fixes
+
+* add GITHUB_TOKEN to oc-changelog for write permissions ([3990b47](https://github.com/baradghimire/opencode-continual-learning/commit/3990b474ac6e5b64bd2649f498870fc7bb38ab36))
+* add GITHUB_TOKEN to oc-changelog for write permissions ([22f1237](https://github.com/baradghimire/opencode-continual-learning/commit/22f12375569aaf4d29b54b1ceb39d8f0e0f36cb2))
+* qualify /oc free model ids with owner ([25df497](https://github.com/baradghimire/opencode-continual-learning/commit/25df497beecddec4a378c597601b615f795ab8a7))
+* relax oc-changelog gate for release-please PRs ([e588940](https://github.com/baradghimire/opencode-continual-learning/commit/e588940a151ea583a4b96552f31d42b17e5bfdc9))
+* relax oc-changelog gate for release-please PRs ([c9de21d](https://github.com/baradghimire/opencode-continual-learning/commit/c9de21d1ca0f5363c247b485b7eeca4f6f6ea904))
+
 ## [0.1.4](https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.3...v0.1.4) (2026-03-03)
 
 ### Miscellaneous Chores
