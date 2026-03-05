@@ -2,6 +2,13 @@
 
 Entries are generated and maintained in release-please style from Conventional Commits.
 
+## [0.4.1](https://github.com/baradghimire/opencode-continual-learning/compare/v0.4.0...v0.4.1) (2026-03-05)
+
+
+### Bug Fixes
+
+* add node engine constraint to package.json ([9a2e19a](https://github.com/baradghimire/opencode-continual-learning/commit/9a2e19a0c939e9b5493e5be9ae4f0b1618e7d059))
+
 ## [0.4.0](https://github.com/baradghimire/opencode-continual-learning/compare/v0.1.4...v0.4.0) (2026-03-05)
 
 This release consolidates versions 0.2.0 through 0.4.0, which were created
