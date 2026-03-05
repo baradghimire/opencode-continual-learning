@@ -1,7 +1,7 @@
 name: release
 
-# Triggered when a draft release is manually published.
-# Flow: release-please creates draft release → you review → click "Publish" → this runs.
+# Triggered when release-please creates a published release.
+# Flow: push to main → release-please PR → merge → release published → this runs → npm publish.
 on:
   release:
     types: [published]
