@@ -1,0 +1,38 @@
+name: oc-zen-free
+
+on:
+  workflow_call:
+    outputs:
+      model:
+        description: Selected OpenCode model
+        value: ${{ jobs.select-model.outputs.model }}
+
+jobs:
+  select-model:
+    runs-on: ubuntu-latest
+    outputs:
+      model: ${{ steps.select.outputs.model }}
+    steps:
+      - name: Select model
+        id: select
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          FALLBACK_MODEL="opencode/kimi-k2"
+          MODELS_URL="https://opencode.ai/zen/v1/models"
+
+          response_file="$(mktemp)"
+          if ! curl -fsSL "$MODELS_URL" -o "$response_file"; then
+            echo "Could not fetch model list, using fallback model: $FALLBACK_MODEL"
+            echo "model=$FALLBACK_MODEL" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          selected_model="$(jq -r 'first(.data[]? | select(.id | type == "string" and test("-free"; "i")) | if (.id | contains("/")) then .id elif (.owned_by | type == "string" and length > 0) then "\(.owned_by)/\(.id)" else .id end) // empty' "$response_file")"
+          if [ -z "$selected_model" ]; then
+            selected_model="$FALLBACK_MODEL"
+          fi
+
+          echo "Selected model: $selected_model"
+          echo "model=$selected_model" >> "$GITHUB_OUTPUT"

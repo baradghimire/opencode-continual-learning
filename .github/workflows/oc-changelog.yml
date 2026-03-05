@@ -1,0 +1,57 @@
+name: oc-changelog
+
+# This workflow runs only on release-please PRs to refine changelog and release notes.
+# It uses the oc-zen-free reusable workflow for free-first model selection.
+# It has contents:write permission to update CHANGELOG.md when needed.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  oc-zen-free:
+    if: |
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.fork == false &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'release-please--') &&
+      (
+        github.event.pull_request.user.login == 'github-actions[bot]' ||
+        github.event.pull_request.user.login == 'release-please[bot]'
+      )
+    uses: ./.github/workflows/oc-zen-free.yml
+
+  oc-changelog:
+    needs: [oc-zen-free]
+    if: needs.oc-zen-free.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Draft changelog and release notes
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        with:
+          model: ${{ needs.oc-zen-free.outputs.model }}
+          prompt: |
+            Analyze this release-please pull request and prepare publish-ready notes.
+
+            Do the following:
+            1. Update the pull request description with a `## Release Notes` section containing concise, user-facing bullet points.
+            2. Update `CHANGELOG.md` under `## [Unreleased]` if there are missing or unclear user-facing bullets.
+            3. Keep changelog formatting stable and avoid duplicate bullets.
+            4. Post a short PR comment summarizing what was improved.
+
+            Constraints:
+            - Keep notes factual and concise.
+            - Modify repository files only when necessary for `CHANGELOG.md` quality.
+            - Do not modify version numbers or release tags.
