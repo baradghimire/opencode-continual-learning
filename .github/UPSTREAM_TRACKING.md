@@ -10,8 +10,8 @@ This document tracks the two upstream projects this plugin is built upon.
 **What it provides:** Core continual-learning concept, SKILL.md format, AGENTS.md contract, cadence logic
 
 ### Current Status
-- **Last Sync Date:** 2026-03-03
-- **Commit Tracked:** `762f866` (main)
+- **Last Sync Date:** 2026-03-09
+- **Commit Tracked:** `e2a9918` (main)
 - **Key Files Monitored:**
   - `continual-learning/skills/continual-learning/SKILL.md` - Skill definition and workflow instructions
   - `continual-learning/.cursor-plugin/plugin.json` - Plugin manifest format
