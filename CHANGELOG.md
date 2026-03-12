@@ -2,6 +2,14 @@
 
 Entries are generated and maintained in release-please style from Conventional Commits.
 
+## [0.5.0](https://github.com/baradghimire/opencode-continual-learning/compare/v0.4.1...v0.5.0) (2026-03-12)
+
+
+### Features
+
+* publish continual-learning as a standalone skill ([bc07c90](https://github.com/baradghimire/opencode-continual-learning/commit/bc07c90ae4feb0a2ebb45e81167d3d1a37c8ce1f))
+* publish continual-learning as a standalone skill ([0986b01](https://github.com/baradghimire/opencode-continual-learning/commit/0986b01654906753e58d0477c45b3fcef60118e2))
+
 ## [0.4.1](https://github.com/baradghimire/opencode-continual-learning/compare/v0.4.0...v0.4.1) (2026-03-05)
 
 
