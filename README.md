@@ -9,13 +9,23 @@ Automatically and incrementally keeps `AGENTS.md` up to date by mining the curre
 - **`AGENTS.md`-aware updates**: the AI reads existing entries and updates them in place rather than appending blindly, keeping the file clean and deduplicated
 - **Noise-resistant**: only high-signal, reusable information is written—recurring preferences and durable workspace facts only; one-off instructions and transient details are excluded
 - **Configurable cadence**: tune the trigger thresholds via environment variables; trial mode for faster initial feedback
-- **Bundled skill**: a `continual-learning` SKILL.md is written to `.opencode/skills/` in your project on first load, providing the AI with detailed extraction and merge instructions
+- **Standalone skill + plugin automation**: the canonical `SKILL.md` lives at the repo root for `npx skills` installs, and the plugin mirrors it into `.opencode/skills/` on first load for OpenCode
 
 ## Requirements
 
 - [OpenCode](https://opencode.ai/) v1.2.15 or later
 
 ## Installation
+
+### Standalone skill (`npx skills`)
+
+Install the reusable skill into any supported agent:
+
+```bash
+npx skills add baradghimire/opencode-continual-learning
+```
+
+### OpenCode plugin (automation)
 
 Add to your OpenCode config (`~/.config/opencode/opencode.json`):
 
@@ -100,7 +110,7 @@ The plugin writes a `SKILL.md` to:
 <project>/.opencode/skills/continual-learning/SKILL.md
 ```
 
-This file is automatically updated when the plugin version changes. You can customize it per-project after installation—the plugin will not overwrite a file that already matches the current version marker.
+This copy comes from the canonical repo-root `SKILL.md`. The plugin writes it on first load if it does not already exist, and then leaves your project copy alone.
 
 ## Contributing
 

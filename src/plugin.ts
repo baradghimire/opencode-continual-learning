@@ -12,6 +12,7 @@
 import type { Plugin } from "@opencode-ai/plugin"
 import * as fs from "node:fs"
 import * as path from "node:path"
+import { fileURLToPath } from "node:url"
 import { loadState, saveState } from "./state"
 
 // ---------------------------------------------------------------------------
@@ -57,92 +58,29 @@ function getCadenceConfig(): CadenceConfig {
 }
 
 // ---------------------------------------------------------------------------
-// Skill definition (bundled with plugin, written to project on init)
+// Canonical skill file (bundled at repo/package root, written to project on init)
 // ---------------------------------------------------------------------------
 
-const PLUGIN_VERSION = "0.1.0"
-const SKILL_VERSION_MARKER = `<!-- continual-learning-plugin-v${PLUGIN_VERSION} -->`
+const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const ROOT_SKILL_PATH = path.join(PACKAGE_ROOT, "SKILL.md")
 
-const SKILL_CONTENT = `---
-name: continual-learning
-description: Incrementally extract recurring user corrections and durable workspace facts from this session's messages, then update AGENTS.md with plain bullet points only. Use when the user asks to mine previous chats, maintain AGENTS.md memory, or build a self-learning preference loop.
----
-${SKILL_VERSION_MARKER}
-
-# Continual Learning
-
-Keep \`AGENTS.md\` current by mining this session's conversation history.
-
-## Inputs
-
-- Current session messages (already in context)
-- Existing memory file: \`AGENTS.md\`
-
-## Workflow
-
-1. Read existing \`AGENTS.md\`.
-2. Review messages from the current session conversation.
-3. Extract only high-signal, reusable information:
-   - Recurring user corrections/preferences
-   - Durable workspace facts (patterns, conventions, tech choices)
-4. Merge with existing bullets in \`AGENTS.md\`:
-   - Update matching bullets in place
-   - Add only net-new bullets
-   - Deduplicate semantically similar bullets
-5. Write back to \`AGENTS.md\` with only these two sections added/updated:
-   - \`## Learned User Preferences\`
-   - \`## Learned Workspace Facts\`
-
-## AGENTS.md Output Contract
-
-- Manage only these sections:
-  - \`## Learned User Preferences\`
-  - \`## Learned Workspace Facts\`
-- Use plain bullet points only.
-- Do not write evidence/confidence tags.
-- Do not write process instructions, rationale, or metadata blocks.
-- Maximum 12 bullets per section.
-
-## Inclusion Bar
-
-Keep an item only if **all** are true:
-
-- Actionable in future sessions
-- Stable across sessions
-- Repeated in the conversation, or explicitly stated as a broad rule
-- Non-sensitive
-
-## Exclusions
-
-Never store:
-
-- Secrets, tokens, credentials, private personal data
-- One-off task instructions
-- Transient details (branch names, commit hashes, temporary errors)
-`
+function loadBundledSkillContent(): string {
+  return fs.readFileSync(ROOT_SKILL_PATH, "utf-8").replace(/\r\n/g, "\n")
+}
 
 /**
  * Write the SKILL.md to the project's .opencode/skills directory.
- * Only writes if the file is missing or was created by an older plugin version.
+ * Only writes if the file is missing.
  */
 function ensureSkill(directory: string): void {
   const skillDir = path.join(directory, ".opencode", "skills", "continual-learning")
   const skillPath = path.join(skillDir, "SKILL.md")
+  if (fs.existsSync(skillPath)) return
 
-  const needsWrite = (() => {
-    if (!fs.existsSync(skillPath)) return true
-    try {
-      const existing = fs.readFileSync(skillPath, "utf-8")
-      return !existing.includes(SKILL_VERSION_MARKER)
-    } catch {
-      return true
-    }
-  })()
-
-  if (!needsWrite) return
+  const bundledSkill = loadBundledSkillContent()
 
   fs.mkdirSync(skillDir, { recursive: true })
-  fs.writeFileSync(skillPath, SKILL_CONTENT, "utf-8")
+  fs.writeFileSync(skillPath, bundledSkill, "utf-8")
 }
 
 // ---------------------------------------------------------------------------

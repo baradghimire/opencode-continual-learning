@@ -13,7 +13,8 @@ This document tracks the two upstream projects this plugin is built upon.
 - **Last Sync Date:** 2026-03-09
 - **Commit Tracked:** `e2a9918` (main)
 - **Key Files Monitored:**
-  - `continual-learning/skills/continual-learning/SKILL.md` - Skill definition and workflow instructions
+  - `continual-learning/skills/continual-learning/SKILL.md` - Upstream skill definition and workflow instructions
+  - `SKILL.md` - Canonical standalone skill source for this repository
   - `continual-learning/.cursor-plugin/plugin.json` - Plugin manifest format
   - `README.md` - Conceptual changes to cadence/rules
 
@@ -21,7 +22,7 @@ This document tracks the two upstream projects this plugin is built upon.
 - [ ] Review SKILL.md for workflow changes
 - [ ] Check for new cadence threshold defaults
 - [ ] Verify AGENTS.md section names unchanged
-- [ ] Test skill file regeneration (delete .opencode/skills/ and restart)
+- [ ] Verify the bundled project skill is created when missing
 
 ### Sync Frequency
 **Quarterly** or whenever significant commits are detected
@@ -64,7 +65,7 @@ curl -s https://api.github.com/repos/joshuadavidthomas/opencode-handoff/releases
 
 # Compare SKILL.md
 curl -s https://raw.githubusercontent.com/cursor/plugins/main/continual-learning/SKILL.md > /tmp/cursor-skill.md
-diff -u .opencode/skills/continual-learning/SKILL.md /tmp/cursor-skill.md
+diff -u SKILL.md /tmp/cursor-skill.md
 ```
 
 ## Manual Sync Workflow

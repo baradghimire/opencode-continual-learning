@@ -20,6 +20,7 @@
   ],
   "main": "src/plugin.ts",
   "files": [
+    "SKILL.md",
     "src",
     "README.md"
   ],
