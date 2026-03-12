@@ -3,6 +3,7 @@ node_modules
 
 # opencode state
 .opencode/state/
+.opencode/skills/
 
 # output
 out

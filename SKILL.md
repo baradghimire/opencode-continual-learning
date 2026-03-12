@@ -2,7 +2,6 @@
 name: continual-learning
 description: Incrementally extract recurring user corrections and durable workspace facts from this session's messages, then update AGENTS.md with plain bullet points only. Use when the user asks to mine previous chats, maintain AGENTS.md memory, or build a self-learning preference loop.
 ---
-<!-- continual-learning-plugin-v0.1.0 -->
 
 # Continual Learning
 
@@ -24,7 +23,7 @@ Keep `AGENTS.md` current by mining this session's conversation history.
    - Update matching bullets in place
    - Add only net-new bullets
    - Deduplicate semantically similar bullets
-5. Write back to `AGENTS.md` with only these two sections added/updated:
+5. Write back to `AGENTS.md` with only these two sections added or updated:
    - `## Learned User Preferences`
    - `## Learned Workspace Facts`
 
@@ -40,7 +39,7 @@ Keep `AGENTS.md` current by mining this session's conversation history.
 
 ## Inclusion Bar
 
-Keep an item only if **all** are true:
+Keep an item only if all are true:
 
 - Actionable in future sessions
 - Stable across sessions
