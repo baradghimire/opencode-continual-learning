@@ -2,6 +2,17 @@
 
 Entries are generated and maintained in release-please style from Conventional Commits.
 
+## [1.0.0](https://github.com/baradghimire/opencode-continual-learning/compare/v0.5.0...v1.0.0) (2026-03-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* trial mode removed (was development-only feature)
+
+### Miscellaneous Chores
+
+* simplify maintenance - remove upstream sync and trial mode ([#44](https://github.com/baradghimire/opencode-continual-learning/issues/44)) ([04f79a4](https://github.com/baradghimire/opencode-continual-learning/commit/04f79a4689af656bbd95fceb14e34332265236f1))
+
 ## [0.5.0](https://github.com/baradghimire/opencode-continual-learning/compare/v0.4.1...v0.5.0) (2026-03-12)
 
 
