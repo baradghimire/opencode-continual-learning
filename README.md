@@ -8,7 +8,7 @@ Automatically and incrementally keeps `AGENTS.md` up to date by mining the curre
 - **`/continual-learning` command**: manually trigger a learning pass at any time
 - **`AGENTS.md`-aware updates**: the AI reads existing entries and updates them in place rather than appending blindly, keeping the file clean and deduplicated
 - **Noise-resistant**: only high-signal, reusable information is written—recurring preferences and durable workspace facts only; one-off instructions and transient details are excluded
-- **Configurable cadence**: tune the trigger thresholds via environment variables; trial mode for faster initial feedback
+- **Configurable cadence**: tune the trigger thresholds via environment variables
 - **Standalone skill + plugin automation**: the canonical `SKILL.md` lives in `skills/continual-learning/` for `npx skills` installs, and the plugin mirrors it into `.opencode/skills/` on first load for OpenCode
 
 ## Requirements
@@ -75,12 +75,6 @@ Items that are **never** stored: secrets, one-off task instructions, transient d
 |---|---|---|
 | `CONTINUAL_LEARNING_MIN_TURNS` | `10` | Minimum completed turns before triggering |
 | `CONTINUAL_LEARNING_MIN_MINUTES` | `120` | Minimum minutes since last run |
-| `CONTINUAL_LEARNING_TRIAL_MODE` | `false` | Enable reduced thresholds for initial testing |
-| `CONTINUAL_LEARNING_TRIAL_MIN_TURNS` | `3` | Min turns in trial mode |
-| `CONTINUAL_LEARNING_TRIAL_MIN_MINUTES` | `15` | Min minutes in trial mode |
-| `CONTINUAL_LEARNING_TRIAL_DURATION_MINUTES` | `1440` | How long trial mode lasts (minutes) |
-
-Set `CONTINUAL_LEARNING_TRIAL_MODE=1` for quicker feedback when first setting up the plugin.
 
 ### State file
 

@@ -22,9 +22,6 @@ import { loadState, saveState } from "./state"
 
 const DEFAULT_MIN_TURNS = 10
 const DEFAULT_MIN_MINUTES = 120
-const TRIAL_MIN_TURNS = 3
-const TRIAL_MIN_MINUTES = 15
-const TRIAL_DURATION_MINUTES = 24 * 60
 
 function parsePositiveInt(value: string | undefined, fallback: number): number {
   if (!value) return fallback
@@ -32,29 +29,15 @@ function parsePositiveInt(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
 }
 
-function parseBoolean(value: string | undefined): boolean {
-  if (!value) return false
-  const v = value.trim().toLowerCase()
-  return v === "1" || v === "true" || v === "yes" || v === "on"
-}
-
 interface CadenceConfig {
   minTurns: number
   minMinutes: number
-  trialMode: boolean
-  trialMinTurns: number
-  trialMinMinutes: number
-  trialDurationMinutes: number
 }
 
 function getCadenceConfig(): CadenceConfig {
   return {
     minTurns: parsePositiveInt(process.env["CONTINUAL_LEARNING_MIN_TURNS"], DEFAULT_MIN_TURNS),
     minMinutes: parsePositiveInt(process.env["CONTINUAL_LEARNING_MIN_MINUTES"], DEFAULT_MIN_MINUTES),
-    trialMode: parseBoolean(process.env["CONTINUAL_LEARNING_TRIAL_MODE"]),
-    trialMinTurns: parsePositiveInt(process.env["CONTINUAL_LEARNING_TRIAL_MIN_TURNS"], TRIAL_MIN_TURNS),
-    trialMinMinutes: parsePositiveInt(process.env["CONTINUAL_LEARNING_TRIAL_MIN_MINUTES"], TRIAL_MIN_MINUTES),
-    trialDurationMinutes: parsePositiveInt(process.env["CONTINUAL_LEARNING_TRIAL_DURATION_MINUTES"], TRIAL_DURATION_MINUTES),
   }
 }
 
@@ -141,20 +124,6 @@ export const ContinualLearningPlugin: Plugin = async (ctx) => {
       const config = getCadenceConfig()
       const now = Date.now()
 
-      // Start the trial timer on the first counted turn (if trial mode is on)
-      if (config.trialMode && state.trialStartedAtMs === null) {
-        state.trialStartedAtMs = now
-      }
-
-      // Determine effective thresholds
-      const inTrial =
-        config.trialMode &&
-        state.trialStartedAtMs !== null &&
-        now - state.trialStartedAtMs < config.trialDurationMinutes * 60_000
-
-      const effectiveMinTurns = inTrial ? config.trialMinTurns : config.minTurns
-      const effectiveMinMinutes = inTrial ? config.trialMinMinutes : config.minMinutes
-
       const turnsSinceLastRun = state.turnsSinceLastRun + 1
       const minutesSinceLastRun =
         state.lastRunAtMs > 0
@@ -164,7 +133,7 @@ export const ContinualLearningPlugin: Plugin = async (ctx) => {
       state.turnsSinceLastRun = turnsSinceLastRun
 
       // Check cadence gates
-      if (turnsSinceLastRun < effectiveMinTurns || minutesSinceLastRun < effectiveMinMinutes) {
+      if (turnsSinceLastRun < config.minTurns || minutesSinceLastRun < config.minMinutes) {
         saveState(directory, state)
         return
       }

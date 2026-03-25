@@ -1,11 +1,9 @@
 ## Learned User Preferences
 
 - Use `bun` instead of `npm` for package management
-- Use trial mode for testing plugins to get faster feedback (reduced cadence thresholds)
 - Prefer symlinking plugin source files for local development and dogfooding
 - TypeScript is the preferred language for OpenCode plugins
 - Values clean project metadata and lockfile consistency
-- Maintain automated upstream dependency tracking with weekly sync checks
 - Use `/oc` command via GitHub Actions to validate and auto-fix issues
 - Include GitHub URLs in documentation/references for easier navigation
 - Keep implementations simple; don't adopt complex upstream architectures when they don't fit the use case
@@ -13,12 +11,12 @@
 ## Learned Workspace Facts
 
 - Project: opencode-continual-learning - OpenCode plugin for automatic AGENTS.md updates
-- Plugin triggers learning after configurable turns + minutes (default: 10 turns + 120 min, trial: 3 turns + 15 min)
+- Plugin triggers learning after configurable turns + minutes (default: 10 turns + 120 min)
 - Plugin writes bundled SKILL.md to `.opencode/skills/continual-learning/` on initialization
 - Plugin persists per-project state to `.opencode/state/continual-learning.json`
 - Skill file lives at `skills/continual-learning/SKILL.md` (not repo root) to support `npx skills add --skill continual-learning` without downloading entire repo
 - Users should install skill via: `npx skills add https://github.com/baradghimire/opencode-continual-learning --skill continual-learning`
-- Plugin environment variables control cadence: `CONTINUAL_LEARNING_MIN_TURNS`, `CONTINUAL_LEARNING_MIN_MINUTES`, `CONTINUAL_LEARNING_TRIAL_MODE`
+- Plugin environment variables control cadence: `CONTINUAL_LEARNING_MIN_TURNS`, `CONTINUAL_LEARNING_MIN_MINUTES`
 - Plugin is actively dogfooded in its own repository
 - GitHub Issues enabled after initial setup for better issue tracking workflow
 - `/oc` GitHub Action: `opencode.yml` dispatches to `oc-zen-free.yml` (model selection) then `opencode` job; model selection uses `https://opencode.ai/zen/v1/models`, prefers `-free` models, falls back to `opencode/kimi-k2`
