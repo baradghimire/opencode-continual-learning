@@ -14,6 +14,8 @@
 - Plugin triggers learning after configurable turns + minutes (default: 10 turns + 120 min, trial: 3 turns + 15 min)
 - Plugin writes bundled SKILL.md to `.opencode/skills/continual-learning/` on initialization
 - Plugin persists per-project state to `.opencode/state/continual-learning.json`
+- Skill file lives at `skills/continual-learning/SKILL.md` (not repo root) to support `npx skills add --skill continual-learning` without downloading entire repo
+- Users should install skill via: `npx skills add https://github.com/baradghimire/opencode-continual-learning --skill continual-learning`
 - Plugin environment variables control cadence: `CONTINUAL_LEARNING_MIN_TURNS`, `CONTINUAL_LEARNING_MIN_MINUTES`, `CONTINUAL_LEARNING_TRIAL_MODE`
 - Upstream dependencies tracked in `.github/UPSTREAM_TRACKING.md` with automated weekly sync checks via GitHub Actions
 - Plugin is actively dogfooded in its own repository

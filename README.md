@@ -5,11 +5,11 @@ Automatically and incrementally keeps `AGENTS.md` up to date by mining the curre
 ## Features
 
 - **Automatic learning**: after a configurable number of completed turns and elapsed time, the plugin silently injects a prompt that tells the AI to run the `continual-learning` skill and update `AGENTS.md`
-- **`/learn` command**: manually trigger a learning pass at any time
+- **`/continual-learning` command**: manually trigger a learning pass at any time
 - **`AGENTS.md`-aware updates**: the AI reads existing entries and updates them in place rather than appending blindly, keeping the file clean and deduplicated
 - **Noise-resistant**: only high-signal, reusable information is written—recurring preferences and durable workspace facts only; one-off instructions and transient details are excluded
 - **Configurable cadence**: tune the trigger thresholds via environment variables; trial mode for faster initial feedback
-- **Standalone skill + plugin automation**: the canonical `SKILL.md` lives at the repo root for `npx skills` installs, and the plugin mirrors it into `.opencode/skills/` on first load for OpenCode
+- **Standalone skill + plugin automation**: the canonical `SKILL.md` lives in `skills/continual-learning/` for `npx skills` installs, and the plugin mirrors it into `.opencode/skills/` on first load for OpenCode
 
 ## Requirements
 
@@ -22,7 +22,7 @@ Automatically and incrementally keeps `AGENTS.md` up to date by mining the curre
 Install the reusable skill into any supported agent:
 
 ```bash
-npx skills add baradghimire/opencode-continual-learning
+npx skills add https://github.com/baradghimire/opencode-continual-learning --skill continual-learning
 ```
 
 ### OpenCode plugin (automation)
@@ -47,22 +47,12 @@ Optionally, pin to a specific version for stability:
 
 ## Usage
 
-### Automatic
-
 The plugin runs silently in the background. After the cadence threshold is met (default: 10 completed turns **and** 120 minutes since the last run), it injects a prompt that asks the AI to invoke the `continual-learning` skill. The AI reads `AGENTS.md`, mines the session conversation, and writes back only:
 
 - `## Learned User Preferences` — recurring corrections and stated preferences
 - `## Learned Workspace Facts` — durable facts about the project (patterns, conventions, tech choices)
 
-### Manual
-
-Run `/learn` at any point to trigger a learning pass immediately:
-
-```
-/learn
-```
-
-The cadence timer is reset after a manual run so the auto-trigger backs off.
+To trigger manually, run `/continual-learning` (the skill is available as a slash command).
 
 ## What gets written to AGENTS.md
 
@@ -104,13 +94,12 @@ Delete this file to reset the turn counter and timer.
 
 ### Skill file
 
-The plugin writes a `SKILL.md` to:
+The plugin checks for the skill in this order:
 
-```
-<project>/.opencode/skills/continual-learning/SKILL.md
-```
+1. **Global**: `~/.agents/skills/continual-learning/SKILL.md` — if present, skips local copy
+2. **Project-local**: `<project>/.opencode/skills/continual-learning/SKILL.md` — created only if global doesn't exist
 
-This copy comes from the canonical repo-root `SKILL.md`. The plugin writes it on first load if it does not already exist, and then leaves your project copy alone.
+If you install the skill globally (via `npx skills add`), the plugin won't create project-local copies. This keeps projects clean when you have the skill available globally.
 
 ## Contributing
 
