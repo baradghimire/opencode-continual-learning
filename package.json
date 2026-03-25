@@ -20,7 +20,7 @@
   ],
   "main": "src/plugin.ts",
   "files": [
-    "SKILL.md",
+    "skills/continual-learning/SKILL.md",
     "src",
     "README.md"
   ],

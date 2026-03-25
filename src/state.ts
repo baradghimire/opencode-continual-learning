@@ -14,15 +14,12 @@ export interface ContinualLearningState {
   lastRunAtMs: number
   /** Number of completed turns since the last learning run */
   turnsSinceLastRun: number
-  /** Timestamp (ms) when trial mode first started; null if not in trial mode */
-  trialStartedAtMs: number | null
 }
 
 const DEFAULT_STATE: ContinualLearningState = {
   version: 1,
   lastRunAtMs: 0,
   turnsSinceLastRun: 0,
-  trialStartedAtMs: null,
 }
 
 function statePath(directory: string): string {
@@ -56,11 +53,6 @@ export function loadState(directory: string): ContinualLearningState {
         parsed.turnsSinceLastRun >= 0
           ? parsed.turnsSinceLastRun
           : 0,
-      trialStartedAtMs:
-        typeof parsed.trialStartedAtMs === "number" &&
-        Number.isFinite(parsed.trialStartedAtMs)
-          ? parsed.trialStartedAtMs
-          : null,
     }
   } catch {
     return { ...DEFAULT_STATE }
