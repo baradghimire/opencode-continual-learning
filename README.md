@@ -154,7 +154,6 @@ The repository has a ruleset enforcing PR-based changes with required review. Al
 - **`release-please`**: Uses [googleapis/release-please-action](https://github.com/googleapis/release-please-action) to manage releases. Parses Conventional Commits to determine semver bumps.
 - **`release`**: Publishes to npm with `--provenance` flag. Uses Bun for dependencies, npm for publish (npm provenance not yet available in Bun).
 - **`oc-zen-free`**: Reusable workflow that selects free OpenCode models first, falling back to `opencode/kimi-k2`.
-- **`upstream-sync`**: Weekly check for upstream dependency updates from cursor/plugins and opencode-handoff.
 
 ### Required Secret for Full Release Automation
 
@@ -173,9 +172,11 @@ You can manually trigger release-please from the GitHub Actions UI if needed:
 
 This plugin is inspired by and draws directly from:
 
-- **[cursor/plugins — continual-learning](https://github.com/cursor/plugins)**: the original plugin concept, cadence logic, SKILL.md workflow, and `AGENTS.md` output contract. The trigger cadence, trial mode, and inclusion/exclusion rules are adapted from Cursor's implementation.
+- **[cursor/plugins](https://github.com/cursor/plugins)** — the continual-learning concept, cadence logic, SKILL.md format, and `AGENTS.md` output contract. Key inspiration at commit [`9c39b57`](https://github.com/cursor/plugins/tree/9c39b574a4c2f4374b568effd115b6dc6fbe3bf4/continual-learning):
+  - [`continual-learning/skills/continual-learning/SKILL.md`](https://github.com/cursor/plugins/blob/9c39b574a4c2f4374b568effd115b6dc6fbe3bf4/continual-learning/skills/continual-learning/SKILL.md) — skill definition and workflow
+  - [`continual-learning/hooks/continual-learning-stop.ts`](https://github.com/cursor/plugins/blob/9c39b574a4c2f4374b568effd115b6dc6fbe3bf4/continual-learning/hooks/continual-learning-stop.ts) — cadence state management logic
 
-- **Josh Thomas' original OpenCode handoff plugin**: this repository was forked from Josh Thomas' work and adapted for continual learning. It informed the OpenCode plugin architecture usage, patterns for `@opencode-ai/plugin` and `@opencode-ai/sdk`, and the command/event hook structure used here.
+- **[joshuadavidthomas/opencode-handoff](https://github.com/joshuadavidthomas/opencode-handoff)** — this repository was forked from Josh Thomas' work. It provided the OpenCode plugin architecture patterns, `@opencode-ai/plugin` and `@opencode-ai/sdk` usage, and the event hook structure. Key inspiration at release [`v0.5.0`](https://github.com/joshuadavidthomas/opencode-handoff/tree/v0.5.0) (commit [`2a9b523`](https://github.com/joshuadavidthomas/opencode-handoff/commit/2a9b523265bff09053b378457204a2294074d075)).
 
 ## License
 

@@ -7,6 +7,8 @@
 - Values clean project metadata and lockfile consistency
 - Maintain automated upstream dependency tracking with weekly sync checks
 - Use `/oc` command via GitHub Actions to validate and auto-fix issues
+- Include GitHub URLs in documentation/references for easier navigation
+- Keep implementations simple; don't adopt complex upstream architectures when they don't fit the use case
 
 ## Learned Workspace Facts
 
@@ -17,9 +19,9 @@
 - Skill file lives at `skills/continual-learning/SKILL.md` (not repo root) to support `npx skills add --skill continual-learning` without downloading entire repo
 - Users should install skill via: `npx skills add https://github.com/baradghimire/opencode-continual-learning --skill continual-learning`
 - Plugin environment variables control cadence: `CONTINUAL_LEARNING_MIN_TURNS`, `CONTINUAL_LEARNING_MIN_MINUTES`, `CONTINUAL_LEARNING_TRIAL_MODE`
-- Upstream dependencies tracked in `.github/UPSTREAM_TRACKING.md` with automated weekly sync checks via GitHub Actions
 - Plugin is actively dogfooded in its own repository
 - GitHub Issues enabled after initial setup for better issue tracking workflow
 - `/oc` GitHub Action: `opencode.yml` dispatches to `oc-zen-free.yml` (model selection) then `opencode` job; model selection uses `https://opencode.ai/zen/v1/models`, prefers `-free` models, falls back to `opencode/kimi-k2`
 - Release pipeline: release-please creates published releases with tags (`include-component-in-tag: false`, tags are `v*`), which triggers `release.yml` (`on: release: published`) for npm publish with `--provenance`
 - npm publish uses Node.js/npm (not Bun) because Bun lacks `--provenance` support; `actions/checkout@v6` is the standard GHA version across workflows
+- cursor/plugins upstream structure: skills now at `continual-learning/skills/continual-learning/SKILL.md`, uses subagent architecture (`agents-memory-updater`) which we intentionally don't adopt for OpenCode
