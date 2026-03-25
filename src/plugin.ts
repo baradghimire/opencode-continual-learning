@@ -11,6 +11,7 @@
 
 import type { Plugin } from "@opencode-ai/plugin"
 import * as fs from "node:fs"
+import * as os from "node:os"
 import * as path from "node:path"
 import { fileURLToPath } from "node:url"
 import { loadState, saveState } from "./state"
@@ -62,20 +63,34 @@ function getCadenceConfig(): CadenceConfig {
 // ---------------------------------------------------------------------------
 
 const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-const ROOT_SKILL_PATH = path.join(PACKAGE_ROOT, "SKILL.md")
+const ROOT_SKILL_PATH = path.join(PACKAGE_ROOT, "skills", "continual-learning", "SKILL.md")
 
 function loadBundledSkillContent(): string {
   return fs.readFileSync(ROOT_SKILL_PATH, "utf-8").replace(/\r\n/g, "\n")
 }
 
+function getGlobalSkillPath(): string {
+  return path.join(os.homedir(), ".agents", "skills", "continual-learning", "SKILL.md")
+}
+
+/**
+ * Check if the skill is available globally (~/.agents/skills/continual-learning/SKILL.md).
+ */
+function hasGlobalSkill(): boolean {
+  return fs.existsSync(getGlobalSkillPath())
+}
+
 /**
  * Write the SKILL.md to the project's .opencode/skills directory.
- * Only writes if the file is missing.
+ * Only writes if:
+ * 1. The file doesn't already exist locally, AND
+ * 2. The skill isn't available globally
  */
 function ensureSkill(directory: string): void {
   const skillDir = path.join(directory, ".opencode", "skills", "continual-learning")
   const skillPath = path.join(skillDir, "SKILL.md")
   if (fs.existsSync(skillPath)) return
+  if (hasGlobalSkill()) return
 
   const bundledSkill = loadBundledSkillContent()
 
@@ -83,31 +98,7 @@ function ensureSkill(directory: string): void {
   fs.writeFileSync(skillPath, bundledSkill, "utf-8")
 }
 
-// ---------------------------------------------------------------------------
-// Prompt templates
-// ---------------------------------------------------------------------------
-
-/**
- * Prompt injected automatically when the cadence threshold is reached.
- * Instructs the AI to invoke the continual-learning skill.
- */
-const AUTO_FOLLOWUP_PROMPT =
-  "Run the `continual-learning` skill now. Review this session's conversation to extract high-signal learnings. " +
-  "First read existing `AGENTS.md` and update matching entries in place—do not only append. " +
-  'Write only to "## Learned User Preferences" and "## Learned Workspace Facts" sections with plain bullet points only—no metadata annotations. ' +
-  "Maximum 12 bullets per section. " +
-  "If no meaningful updates exist, respond exactly: No high-signal memory updates."
-
-/**
- * Template for the /learn command (manual trigger, identical intent but
- * without an internal marker so it reads naturally as a user message).
- */
-const LEARN_COMMAND_TEMPLATE =
-  "Run the `continual-learning` skill now. Review this session's conversation to extract high-signal learnings. " +
-  "First read existing `AGENTS.md` and update matching entries in place—do not only append. " +
-  'Write only to "## Learned User Preferences" and "## Learned Workspace Facts" sections with plain bullet points only—no metadata annotations. ' +
-  "Maximum 12 bullets per section. " +
-  "If no meaningful updates exist, respond exactly: No high-signal memory updates."
+const PROMPT = "/continual-learning"
 
 // ---------------------------------------------------------------------------
 // Plugin
@@ -116,11 +107,8 @@ const LEARN_COMMAND_TEMPLATE =
 export const ContinualLearningPlugin: Plugin = async (ctx) => {
   const { client, directory } = ctx
 
-  // Track sessions where we just injected a learning prompt so we skip
-  // counting their next session.idle (the AI's response to our trigger).
   const pendingLearning = new Set<string>()
 
-  // Ensure the skill definition exists in this project (non-fatal on failure)
   try {
     ensureSkill(directory)
   } catch {
@@ -128,30 +116,12 @@ export const ContinualLearningPlugin: Plugin = async (ctx) => {
   }
 
   return {
-    // Register the /learn command for manual triggering
-    config: async (config) => {
-      config.command = config.command ?? {}
-      config.command["learn"] = {
-        description: "Mine this session for learnings and update AGENTS.md",
-        template: LEARN_COMMAND_TEMPLATE,
-      }
-    },
-
-    // Core logic: count turns and trigger learning when the cadence is met
     event: async ({ event }) => {
-      if (event.type === "command.executed") {
-        if (event.properties.name === "learn") {
-          pendingLearning.add(event.properties.sessionID)
-        }
-        return
-      }
-
       if (event.type !== "session.idle") return
 
       const sessionId = event.properties.sessionID
       if (!sessionId) return
 
-      // Skip the idle that follows our own injected learning prompt
       if (pendingLearning.has(sessionId)) {
         pendingLearning.delete(sessionId)
 
@@ -209,7 +179,7 @@ export const ContinualLearningPlugin: Plugin = async (ctx) => {
         await client.session.prompt({
           path: { id: sessionId },
           body: {
-            parts: [{ type: "text", text: AUTO_FOLLOWUP_PROMPT }],
+            parts: [{ type: "text", text: PROMPT }],
           },
         })
       } catch {
